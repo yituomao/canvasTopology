@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="layui/css/layui.css" />
+		<script src="layui/layui.js"></script>
+		<script src="js/jquery.min.js"></script>
+		<style>
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			.control span{
+				color: royalblue;
+				cursor: pointer;
+			}
+			.control{
+				display: flex;
+				white-space: nowrap;
+				padding-top: 10px;
+				line-height: 40px;
+			}
+			.canvas{
+				position: relative;
+			}
+			.canvas div{
+				position: absolute;
+				/* pointer-events: none; */
+			
+			}
+			.control div{
+				margin-left: 10px;
+			}
+			#ca{
+				background: #f5f5f5;
+			}
+			.layui-inline .layui-form-label{
+				width: auto;
+			}
+			
+		</style>
+	</head>
+	<body>
+		
+		<div class="control">
+			<div>地形元素：<span onclick="addImg()">添加</span>/<span onclick="removeImg()">移除</span></div>
+			<div>形：<span onclick="addShape()">添加</span>/<span onclick="removeShape()">移除</span></div>
+			<div>链接：<span onclick="addLine()">添加</span>/<span onclick="delLine()">移除</span></div>
+			<!-- <div>展开宏：<span>开</span></div> -->
+			<!-- <div><span>已查看</span>/<span>开</span></div> -->
+			<div>
+				<div class="layui-form">
+					<div class="layui-form-item">
+						<div class="layui-form-label" style="width: auto;">网格：</div>
+						<div class="layui-input-block" style="margin-left: 80px;">
+							<select name="inp8" lay-filter="grid">
+								<option value="40">40x40</option>
+								<option value="80">80x80</option>
+								<option value="120">120x120</option>
+								<option value="0">无</option>
+
+
+							</select>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div>
+				<!-- <span>对齐拓扑元素</span> -->
+				<button onclick="save()" type="button" class="layui-btn layui-btn-normal">保存</button>
+			</div>
+
+		</div>
+		<div class="canvas">
+			<canvas id="ca">
+				您的浏览器不支持canvas，请更换浏览器！
+			</canvas>
+		</div>
+		<div id="changeParam" style="display: none; padding: 10px;">
+			<form class="layui-form" action="" lay-filter="formDemo">
+				<div class="layui-form-item">
+					<label class="layui-form-label">类型</label>
+					<div class="layui-input-block">
+						<select name="type" lay-verify="required">
+
+							<option value="0">主机</option>
+							<option value="1">防火墙</option>
+							<option value="2">路由器</option>
+							<option value="3">交换机</option>
+							<option value="4">其它</option>
+							
+
+						</select>
+					</div>
+				</div>
+				<div class="layui-form-item layui-form-text">
+					<label class="layui-form-label">标签</label>
+					<div class="layui-input-block">
+						<textarea name="desc" placeholder="请输入内容" class="layui-textarea"></textarea>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">标签位置</label>
+					<div class="layui-input-block">
+						<select name="lposit" lay-verify="required">
+
+							<option value="0">默认</option>
+							<option value="1">正下方</option>
+							<option value="2">底部</option>
+
+						</select>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">图片链接</label>
+					<div class="layui-input-block">
+						<!-- <button type="button" class="layui-btn" id="test1">
+								  <i class="layui-icon">&#xe67c;</i>上传图片
+								</button> -->
+						<input type="text" name="images" placeholder="链接" autocomplete="off" class="layui-input">
+
+					</div>
+				</div>
+				<div class="layui-form-item">
+
+
+					<label class="layui-form-label">大小</label>
+					<div class="layui-input-inline" style="width: 100px;">
+						<input type="text" name="width" placeholder="宽" autocomplete="off" class="layui-input">
+					</div>
+					<div class="layui-form-mid">-</div>
+					<div class="layui-input-inline" style="width: 100px;">
+						<input type="text" name="height" placeholder="高" autocomplete="off" class="layui-input">
+					</div>
+
+
+
+
+				</div>
+
+
+				<div class="layui-form-item">
+					<div class="layui-input-block">
+						<button class="layui-btn" lay-submit lay-filter="formDemo">应用</button>
+						<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div id="shapeParam" style="display: none; padding: 10px;">
+			<form class="layui-form" action="">
+				<div class="layui-form-item">
+					<label class="layui-form-label">形</label>
+					<div class="layui-input-block">
+						<input type="radio" name="shape" value="rect" lay-filter="shape" title="矩形">
+						<input type="radio" name="shape" value="elipes" lay-filter="shape" title="椭圆" checked>
+						<!-- <input type="radio" name="shape" value="line" lay-filter="shape" title="线"> -->
+					</div>
+				</div>
+			</form>
+
+			<div class="noline">
+				<form class="layui-form" action="" lay-filter="shapeForm">
+
+					<div class="layui-form-item layui-form-text">
+						<label class="layui-form-label">文本</label>
+						<div class="layui-input-block">
+							<textarea name="text" placeholder="请输入内容" class="layui-textarea"></textarea>
+							<div class="layui-inline" style="margin-top: 10px;">
+								<label class="layui-form-label">字体</label>
+								<div class="layui-input-inline" style="width: 100px;">
+									<select name="fontFamily" lay-verify="required">
+
+										<option value="Arial">Arial</option>
+									</select>
+								</div>
+								<label class="layui-form-label">字体大小</label>
+								<div class="layui-input-inline" style="width: 100px;">
+									<input type="text" name="fontSize" class="layui-input">
+								</div>
+								<label class="layui-form-label">颜色</label>
+								<div class="layui-input-inline" style="width: 100px;">
+									<input type="color" name="textColor" class="layui-input">
+								</div>
+								<label class="layui-form-label">对齐</label>
+								<div class="layui-input-inline" style="width: 100px;">
+									<select name="align" lay-verify="required">
+
+										<option value="center">居中</option>
+									</select>
+								</div>
+							</div>
+
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">背景</label>
+						<div class="layui-input-inline" style="width: 100px;">
+							<input type="color" name="bgColor" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">边</label>
+						<div class="layui-input-block">
+
+							<label class="layui-form-label">类型</label>
+							<div class="layui-input-inline" style="width: 100px;">
+								<select name="borderType" lay-verify="required">
+
+									<option value="1">实线</option>
+									<option value="0">虚线</option>
+								</select>
+							</div>
+							<label class="layui-form-label">宽</label>
+							<div class="layui-input-inline" style="width: 100px;">
+								<input type="text" name="borderWidth" class="layui-input">
+							</div>
+							<label class="layui-form-label">颜色</label>
+							<div class="layui-input-inline" style="width: 100px;">
+								<input type="color" name="borderColor" class="layui-input">
+							</div>
+
+						</div>
+					</div>
+					<div class="layui-form-item">
+
+
+						<label class="layui-form-label">坐标</label>
+						<div class="layui-input-inline" style="width: 100px;">
+							<input type="text" name="posit_x" placeholder="X" autocomplete="off" class="layui-input">
+						</div>
+						<div class="layui-form-mid">-</div>
+						<div class="layui-input-inline" style="width: 100px;">
+							<input type="text" name="posit_y" placeholder="Y" autocomplete="off" class="layui-input">
+						</div>
+
+
+
+
+					</div>
+					<div class="layui-form-item">
+
+
+						<label class="layui-form-label">大小</label>
+						<div class="layui-input-inline" style="width: 100px;">
+							<input type="text" name="width" placeholder="宽" autocomplete="off" class="layui-input">
+						</div>
+						<div class="layui-form-mid">-</div>
+						<div class="layui-input-inline" style="width: 100px;">
+							<input type="text" name="height" placeholder="高" autocomplete="off" class="layui-input">
+						</div>
+
+
+
+
+					</div>
+
+
+					<div class="layui-form-item">
+						<div class="layui-input-block">
+							<button class="layui-btn" lay-submit lay-filter="shapeForm">应用</button>
+							<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+						</div>
+					</div>
+				</form>
+			</div>
+	<!-- 		<div class="line" style="display: none;">
+				<form class="layui-form" action="">
+
+					<div class="layui-form-item">
+						<label class="layui-form-label">线</label>
+						<div class="layui-input-block">
+
+							<label class="layui-form-label">类型</label>
+							<div class="layui-input-inline" style="width: 100px;">
+								<select name="borderType" lay-verify="required">
+
+									<option value="1">实线</option>
+									<option value="0">虚线</option>
+								</select>
+							</div>
+							<label class="layui-form-label">宽</label>
+							<div class="layui-input-inline" style="width: 100px;">
+								<input type="text" name="borderWidth" class="layui-input">
+							</div>
+							<label class="layui-form-label">颜色</label>
+							<div class="layui-input-inline" style="width: 100px;">
+								<input type="color" name="borderColor" class="layui-input">
+							</div>
+
+						</div>
+					</div>
+					<div class="layui-form-item">
+
+
+						<label class="layui-form-label">点</label>
+						<div class="layui-input-inline" style="width: 100px;">
+							<input type="text" name="posit_x" placeholder="X1" autocomplete="off" class="layui-input">
+						</div>
+						<div class="layui-form-mid">-</div>
+						<div class="layui-input-inline" style="width: 100px;">
+							<input type="text" name="posit_y" placeholder="Y1" autocomplete="off" class="layui-input">
+						</div>
+
+
+
+
+					</div>
+					<div class="layui-form-item">
+
+
+						<label class="layui-form-label"> </label>
+						<div class="layui-input-inline" style="width: 100px;">
+							<input type="text" name="width" placeholder="X2" autocomplete="off" class="layui-input">
+						</div>
+						<div class="layui-form-mid">-</div>
+						<div class="layui-input-inline" style="width: 100px;">
+							<input type="text" name="height" placeholder="Y2" autocomplete="off" class="layui-input">
+						</div>
+
+
+
+
+					</div>
+
+
+					<div class="layui-form-item">
+						<div class="layui-input-block">
+							<button class="layui-btn" lay-submit lay-filter="lineForm">应用</button>
+							<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+						</div>
+					</div>
+
+				</form>
+			</div> -->
+
+		</div>
+		
+		<div style="display: none;" class="myimg">
+			
+		</div>
+		<script src="js/main.js"></script>
+		<script>
+			layui.use(['form', 'layedit', 'laydate', 'element', 'upload'], function() {
+				var form = layui.form,
+					layer = layui.layer,
+					layedit = layui.layedit,
+					laydate = layui.laydate,
+					upload = layui.upload,
+					element = layui.element;
+				//监听提交
+				form.on('submit(formDemo)', function(data) {
+					changeImg(data.field)
+					// layer.msg(JSON.stringify(data.field));
+					return false;
+				});
+				form.on('submit(shapeForm)', function(data) {
+					data.field.shape = $('input[name=shape]:checked').val()
+					changeShape(data.field)
+
+					return false;
+				});
+				form.on('submit(lineForm)', function(data) {
+					data.field.shape = $('input[name=shape]:checked').val()
+
+					changeShape(data.field)
+
+
+					return false;
+				});
+				//执行实例
+				//  var uploadInst = upload.render({
+				// elem: '#test1' 
+				// ,url: '/upload/' 
+				// ,done: function(res){
+				// 
+				// }
+				// ,error: function(){
+				//  
+				// }
+				//  });
+				form.on('select(grid)', function(data) {
+					console.log(data);
+					gridChange(data.value)
+				});
+				form.on('radio(shape)', function(data) {
+					console.log(data);
+					if (data.value == 'line') {
+						$('.line').show()
+						$('.noline').hide()
+					} else {
+						$('.noline').show()
+						$('.line').hide()
+					}
+				});
+
+				
+			})
+		</script>
+		
+	</body>
+</html>
